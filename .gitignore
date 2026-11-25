@@ -1,0 +1,16 @@
+# Dataset original (pesado): no se sube. Ver README para descargarlo.
+#Las siguientes dos lineas anulan lo que se ve en data/raw excepto el archivo .gitkeep, que sirve para mantener la carpeta vacía en el repositorio
+data/raw/*
+!data/raw/.gitkeep
+
+
+# Entornos virtuales
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Configuración local
+.env
