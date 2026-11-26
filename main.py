@@ -1,6 +1,7 @@
-"""Punto de entrada: ejecuta el pipeline completo (Extracción -> Transformación -> Carga)."""
+# Punto de entrada: ejecuta el pipeline completo (Extracción -> Transformación -> Carga) ETL.
+
 import argparse
-import logging
+import logging #Libreria buena para mensajes de informacion, error, entre otros. Y permite configurar el nivel de detalle de los mensajes.
 import sys
 from pathlib import Path
 
@@ -8,15 +9,14 @@ from src.carga import guardar_parquet
 from src.extraccion import leer_csv
 from src.transformacion import limpiar_datos
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent #convierte la ruta del archivo en un objeto Path y obtiene el directorio padre del archivo actual. No importa desde donde se ejecute.
+#.resolve() obtiene la ruta absoluta del archivo actual, y .parent obtiene el directorio que contiene ese archivo.
 
-
-def parsear_argumentos():
+def parsear_argumentos(): #funcion
     parser = argparse.ArgumentParser(description="Pipeline de ingesta y limpieza (CSV -> Parquet).")
-    parser.add_argument("--input", type=Path, default=BASE_DIR / "data" / "raw" / "telco_customer_churn.csv",
-                        help="CSV de entrada")
-    parser.add_argument("--output", type=Path, default=BASE_DIR / "data" / "processed" / "telco_churn_limpio.parquet",
-                        help="Parquet de salida")
+    
+    parser.add_argument("--input", type=Path, default=BASE_DIR / "data" / "raw" / "telco_customer_churn.csv", help="CSV de entrada")
+    parser.add_argument("--output", type=Path, default=BASE_DIR / "data" / "processed" / "telco_churn_limpio.parquet", help="Parquet de salida")
     return parser.parse_args()
 
 
