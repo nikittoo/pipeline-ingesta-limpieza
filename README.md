@@ -1,6 +1,6 @@
 # Pipeline de ingesta y limpieza de datos (CSV -> Parquet)
 
-Pipeline ETL modular en Python que lee el dataset público **Telco Customer Churn** (clientes de una empresa de telecomunicaciones), lo limpia y lo guarda en formato **Parquet**, listo para usar en proyectos de Machine Learning.
+Pipeline ETL (extraer, transformar y cargar) modular en Python que lee el dataset público **Telco Customer Churn** (clientes de una empresa de telecomunicaciones), lo limpia y lo guarda en formato **Parquet**, listo para usar en proyectos de Machine Learning.
 
 ## Qué hace
 
@@ -65,9 +65,8 @@ El entorno y las librerías quedan guardados en la carpeta `.venv`; lo único qu
 El CSV original **no se incluye en el repositorio** (está en `.gitignore`). Para obtenerlo:
 
 1. Descargá *Telco Customer Churn* desde una de estas fuentes:
-   - Kaggle: https://www.kaggle.com/datasets/blastchar/telco-customer-churn
-   - Hugging Face: https://huggingface.co/datasets/scikit-learn/churn-prediction (pestaña *Files and versions*)
-2. Guardalo como `data/raw/telco_customer_churn.csv`.
+   - Hugging Face: https://huggingface.co/datasets/scikit-learn/churn-prediction (pestaña *Files and versions* se encuentra uno que dice "dataset.csv" descargamos ese y lo guardamos en /data/raw/Nombre_del_csv)
+2. Se guarda en la ruta `data/raw/telco_customer_churn.csv` recomendable usar ese nombre para el CSV.
 
 Es un dataset de ejemplo de una empresa ficticia (IBM Sample Datasets): 7.043 clientes y 21 columnas, con la etiqueta `Churn` (si el cliente abandonó el servicio).
 
@@ -95,7 +94,7 @@ Con el dataset completo:
 | Métrica | Valor |
 |---|---|
 | Filas leídas | 7.043 (21 columnas) |
-| Memoria en pandas | 1,86 MB con tipos por defecto → **0,37 MB** optimizado (≈ 80 % menos) |
+| Memoria en pandas | 1,86 MB con tipos por defecto -> 0,37 MB optimizado (≈ 80 % menos) |
 | Duplicados encontrados | 0 |
 | Nulos encontrados | 11 (todos en `total_charges`) |
 | Filas finales | 7.043 |
@@ -103,14 +102,14 @@ Con el dataset completo:
 
 ## Decisiones de limpieza
 
-- **Nombres de columnas:** se pasan a `snake_case` (`customerID` → `customer_id`, `MonthlyCharges` → `monthly_charges`) para trabajar de forma consistente.
+- **Nombres de columnas:** se pasan a `snake_case` (`customerID` -> `customer_id`, `MonthlyCharges` -> `monthly_charges`) para trabajar de forma consistente.
 - **`total_charges` llega como texto:** el CSV trae celdas con un espacio en blanco. Se lee como texto y se convierte a número en la transformación, donde los vacíos pasan a nulos y se pueden tratar.
-- **Nulos en `total_charges` → 0:** las 11 filas con este valor vacío corresponden a clientes con `tenure = 0` (recién dados de alta, todavía sin facturar), por lo que el total acumulado real es 0. Se comprobó con el dataset real: los 11 casos cumplen esa condición.
+- **Nulos en `total_charges` -> 0:** las 11 filas con este valor vacío corresponden a clientes con `tenure = 0` (recién dados de alta, todavía sin facturar), por lo que el total acumulado real es 0. Se comprobó con el dataset real: los 11 casos cumplen esa condición.
 - **Otras reglas de nulos (el dataset actual no las necesitó, pero el pipeline las contempla):**
   - Sin `customer_id` o sin `churn`: se descarta la fila (no se sabe de quién es ni qué predecir; inventar la etiqueta falsearía el dato).
   - Otros nulos numéricos: se completan con la mediana, que es robusta a valores extremos.
   - Nulos en columnas categóricas: se completan con la categoría `Unknown`.
-- **Duplicados:** se eliminan las filas idénticas y los `customer_id` repetidos. En este dataset no había ninguno.
+- **Duplicados:** se eliminan las filas idénticas y los `customer_id` repetidos. (en este dataset no había ninguno)
 - **Validación final:** si quedara algún nulo o duplicado, el pipeline se detiene con un error en lugar de guardar datos sucios.
 
 ## ¿Por qué Parquet?
@@ -122,7 +121,10 @@ Con el dataset completo:
 
 ## ¿Por qué Pandas y no Dask?
 
-El dataset es chico (7.043 filas, menos de 1 MB) y entra sin problemas en memoria. Dask, pensado para datos que no caben en una sola máquina, agregaría complejidad sin beneficio. Si el volumen creciera a millones de filas, se podría migrar a Dask o Polars sin cambiar la estructura de etapas.
+El dataset es chico (7.043 filas, menos de 1 MB) y entra sin problemas en memoria. 
+Dask, pensado para datos que no caben en una sola máquina, agregaría complejidad sin beneficio. 
+Si el volumen creciera a millones de filas, se podría migrar a Dask o Polars sin cambiar la estructura de etapas.
+Pero como el volumen es chico trabajamos con -> pandas.
 
 ## Limitaciones
 
